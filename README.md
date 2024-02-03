@@ -8,6 +8,10 @@ Install Python dependencies by running `make install`.
 
 ## Commands
 
+Publish AsciiMath playground to https://feihong.github.io/math-journal:
+
+    make publish
+
 Extract text from PDF:
 
     pdf2txt.py path/to/document.pdf > output.txt
