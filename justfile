@@ -6,3 +6,6 @@ nb:
 
 publish:
 	ghp-import --no-jekyll --push --no-history content
+
+merge:
+	python merge_pdfs.py

@@ -8,12 +8,14 @@ Install Python dependencies by running `make install`.
 
 ## Commands
 
-Publish AsciiMath playground to https://feihong.github.io/math-journal:
+Stitch homework PDF files inside `homework/` directory into a single PDF file:
 
-    make publish
+    just merge
 
-Extract text from PDF:
+## Save homework page as PDF
 
-    pdf2txt.py path/to/document.pdf > output.txt
-
-But it doesn't seem to work well.
+1. Open homework page in Chrome
+1. Open the Print dialog
+1. Click 'More settings'
+1. Choose paper size of A5 (makes text bigger)
+1. Toggle background graphics
