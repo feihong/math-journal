@@ -4,7 +4,7 @@
 
 Install Julia via [asdf version manager](https://asdf-vm.com/).
 
-Install Python dependencies by running `make install`.
+Install Python dependencies by running `just install`.
 
 ## Commands
 

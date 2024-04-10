@@ -7,24 +7,42 @@ Reference: https://github.com/pymupdf/PyMuPDF-Utilities/blob/master/examples/imp
 from pathlib import Path
 import fitz
 
-pdf_files = list(sorted(Path('homework').glob('*.pdf')))
+output_file = Path('homework.pdf')
+homework_dir = Path('homework')
 
-doc = fitz.open()
 
-curr_page = 1
-toc = []
+def main():
+  downloaded_files = Path('~/Downloads').expanduser().glob('homework ??.pdf')
+  for downloaded_file in downloaded_files:
+    dest = homework_dir / downloaded_file.name
+    downloaded_file.replace(dest)
+    print(f'Move {downloaded_file} to {dest}')
+  print(list(downloaded_files))
 
-for i, pdf_file in enumerate(pdf_files, 1):
-  new_doc = fitz.open(pdf_file)
-  doc.insert_pdf(new_doc)
+  pdf_files = list(sorted(homework_dir.glob('*.pdf')))
+  merge(pdf_files)
 
-  toc_item = [1, f'Homework {i}', curr_page]
-  print(toc_item)
-  toc.append(toc_item)
 
-  curr_page += len(new_doc)
+def merge(pdf_files):
+  doc = fitz.open()
 
-doc.set_toc(toc)
-print(doc.get_toc())
+  curr_page = 1
+  toc = []
 
-doc.save('homework.pdf')
+  for i, pdf_file in enumerate(pdf_files, 1):
+    new_doc = fitz.open(pdf_file)
+    doc.insert_pdf(new_doc)
+
+    toc_item = [1, f'Homework {i}', curr_page]
+    print(toc_item)
+    toc.append(toc_item)
+
+    curr_page += len(new_doc)
+
+  doc.set_toc(toc)
+
+  doc.save(output_file)
+  print(f'Saved {output_file}')
+
+if __name__ == '__main__':
+  main()
