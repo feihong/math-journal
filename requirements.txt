@@ -1,2 +1,7 @@
+aiohttp
+aiohttp-devtools
 ghp-import
+htpy
+markdown-it-py[linkify]
+mdit-py-plugins
 pymupdf
