@@ -2,8 +2,6 @@
 
 ## Installation
 
-Install Julia via [asdf version manager](https://asdf-vm.com/).
-
 Install Python dependencies by running `just install`.
 
 ## Commands
@@ -19,3 +17,15 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 1. Click 'More settings'
 1. Choose paper size of A5 (makes text bigger)
 1. Toggle background graphics
+
+## TODO
+
+- Click on problem description to black out all other elements on the page
+- Generate an TOC for all problems on a page
+- Make page to debug individual asymptote figures
+
+## Links
+
+- [TinyTeX](https://github.com/rstudio/tinytex)
+- [Asymptote: The Vector Graphics Language](https://asymptote.sourceforge.io/)
+- [Asymptote geometry module](https://web.archive.org/web/20200128180233/http://www.piprime.fr/files/asymptote/geometry/modules/geometry.asy.index.type.html)

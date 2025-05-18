@@ -1,0 +1,68 @@
+"""
+Process a markdown line so that it looks nicer when rendered.
+"""
+import re
+from dataclasses import dataclass
+
+import figure
+
+
+@dataclass
+class Asy:
+  lines: list[str]
+
+class LineProcessor:
+  def __init__(self, text):
+    self.mode = None
+    self.text = text
+    self.figures = []
+
+  def process(self):
+    return '\n'.join(self._process(self.text))
+
+  def _process(self, text):
+    for line in text.splitlines():
+      result, mode = self.process_line(line, self.mode)
+      self.mode = mode
+      if result is not None:
+        yield result
+
+  def process_line(self, line, mode):
+    line = line.strip()
+
+    match mode:
+      case Asy(lines):
+        if line == '[/asy]':
+          return self.get_svg(lines), None
+        else:
+          lines.append(line)
+          return None, Asy(lines)
+      case None:
+        if line == '[asy]':
+          return None, Asy([])
+        elif line == '===':
+          return '---', None
+        elif line == 'Solution:':
+          return '\n<b>Solution</b>\n', None
+        elif m := re.match(r'(\d+)\.', line):
+          return f'<h2>Problem {m.group(1)}.</h2>', None
+        elif re.match(r'^(?:Your Answer|Your First Answer|Your Second Answer): .*', line):
+          return None, None
+        else:
+          return line, None
+
+  def get_svg(self, lines):
+    code = '\n'.join(lines).strip()
+    svg_file = figure.get_svg_file(code)
+
+    if svg_file.exists():
+      return f'<img src="/figures/{svg_file.name}">'
+    else:
+      self.figures.append(code)
+      style = 'color: blue; font-size: 2em; border: 1px dashed blue; padding: 0.5em;'
+      return f'<div style="{style}"><a href="./render-figures">FIGURE</a></div>'
+
+
+def transform(text):
+  proc = LineProcessor(text)
+  return proc.process(), proc

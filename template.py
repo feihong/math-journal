@@ -13,7 +13,7 @@ html {
 }
 """
 
-def doc(title, *children):
+def doc(title, caption, *children):
     return str(
         html[
             head[
@@ -24,6 +24,7 @@ def doc(title, *children):
             ],
             body[
                 h1[title],
+                caption,
                 *children,
             ],
         ]
