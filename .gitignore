@@ -5,4 +5,4 @@ scratch.py
 *.pdf
 *.md
 *.svg
-*.asy
+figures/*.asy
