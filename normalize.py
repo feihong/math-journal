@@ -40,8 +40,9 @@ class LineProcessor:
       case None:
         if line == '[asy]':
           return None, Asy([])
-        elif line == 'Solution:':
-          return '\n<b>Solution</b>\n', None
+        elif m := re.match(r'Solution(?: (1|2))?\:', line):
+          num = m.group(1) if m.group(1) else ''
+          return f'\n<b>Solution {num}</b>\n', None
         elif m := re.match(r'(\d+)\.', line):
           return f'<h2>Problem {m.group(1)}.</h2>', None
         elif re.match(r'^(?:Your Answer|Your First Answer|Your Second Answer): .*', line):

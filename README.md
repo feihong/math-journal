@@ -20,7 +20,9 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 
 ## TODO
 
-- Migrate from KaTeX to MathJax
+- Don't show render link if all figures are rendered
+- Edit asymptote code directly from figure-debug page
+- Redirect back to the page if everything successfully rendered
 - Click on problem description to black out all other elements on the page
 - Generate an TOC for all problems on a page
 
