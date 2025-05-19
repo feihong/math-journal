@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from aiohttp import web
-from htpy import ul, li, a, div
+from htpy import ul, li, a, div, textarea
 
 import template
 import markdown
@@ -61,12 +61,32 @@ async def render_figures(request):
 
     return web.Response(text=proc.stdout)
 
+async def figure_debug(request):
+    name = request.match_info.get('name')
+    number = int(request.match_info.get('number'))
+    path = problems_dir / (name + '.md')
+
+    proc = normalize.LineProcessor(path.read_text())
+    proc.process()
+
+    asy_code = proc.figures[number]
+    svg_result = figure.generate_svg_file(asy_code)
+
+    doc = template.doc(
+        f'Figure {number} of {name}',
+        textarea(cols=80, rows=10, readonly=True)[asy_code],
+        div[svg_result],
+    )
+
+    return web.Response(text=doc, content_type='html')
+
 app = web.Application()
 app.add_routes([
     web.get('/', index),
     web.static('/figures', figure.figures_dir, show_index=True),
     web.get('/{name}/', document),
     web.get('/{name}/render-figures', render_figures),
+    web.get('/{name}/figure-debug/{number}/', figure_debug),
 ])
 
 if __name__ == '__main__':

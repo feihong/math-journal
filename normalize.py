@@ -33,15 +33,13 @@ class LineProcessor:
     match mode:
       case Asy(lines):
         if line == '[/asy]':
-          return self.get_svg(lines), None
+          return self.get_figure(lines), None
         else:
           lines.append(line)
           return None, Asy(lines)
       case None:
         if line == '[asy]':
           return None, Asy([])
-        elif line == '===':
-          return '---', None
         elif line == 'Solution:':
           return '\n<b>Solution</b>\n', None
         elif m := re.match(r'(\d+)\.', line):
@@ -51,16 +49,20 @@ class LineProcessor:
         else:
           return line, None
 
-  def get_svg(self, lines):
+  def get_figure(self, lines):
     code = '\n'.join(lines).strip()
     svg_file = figure.get_svg_file(code)
 
+    number = len(self.figures)
+    self.figures.append(code)
+
     if svg_file.exists():
-      return f'<img src="/figures/{svg_file.name}">'
+      body = f'<img src="/figures/{svg_file.name}">'
     else:
-      self.figures.append(code)
       style = 'color: blue; font-size: 2em; border: 1px dashed blue; padding: 0.5em;'
-      return f'<div style="{style}"><a href="./render-figures">FIGURE</a></div>'
+      body = f'<div style="{style}">FIGURE</div>'
+
+    return f'<a href="./figure-debug/{number}/"> {body} </a>'
 
 
 def transform(text):

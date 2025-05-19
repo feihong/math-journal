@@ -7,6 +7,9 @@ install:
 merge:
 	python merge_pdfs.py
 
+clean:
+	rm figures/*.{asy,svg}
+
 # Launches a server on localhost:8080
 serve:
 	{{scripts_path}}/aiohttp-devtools runserver serve.py
