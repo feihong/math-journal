@@ -1,5 +1,10 @@
-# https://katex.org/docs/autorender.html
-# https://github.com/KaTeX/KaTeX/blob/main/contrib/auto-render/auto-render.js
+"""
+It's not recommended to use KaTeX because its support for TeX commands is a bit too limited. For example, it can't
+handle mbox.
+
+https://katex.org/docs/autorender.html
+https://github.com/KaTeX/KaTeX/blob/main/contrib/auto-render/auto-render.js
+"""
 
 snippet = """
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">

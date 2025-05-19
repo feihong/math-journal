@@ -1,7 +1,7 @@
 from markupsafe import Markup
 from htpy import html, head, meta, title as title_tag, style, body, h1
 
-import katex
+import mathjax
 
 css = """
 html {
@@ -20,7 +20,7 @@ def doc(title, caption, *children):
                 meta(charset='utf-8'),
                 title_tag[title],
                 style[css],
-                Markup(katex.snippet),
+                Markup(mathjax.snippet),
             ],
             body[
                 h1[title],
