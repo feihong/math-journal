@@ -1,3 +1,5 @@
+import json
+
 from markupsafe import Markup
 from htpy import html, head, meta, title as title_tag, style, body as body_tag, h1, div, textarea, button, script
 
@@ -15,7 +17,7 @@ html {
 }
 """
 
-def doc(title, prebody, body):
+def doc(title, body):
     return str(
         html[
             head[
@@ -27,19 +29,28 @@ def doc(title, prebody, body):
             ],
             body_tag[
                 h1[title],
-                prebody,
                 body,
             ],
         ]
     )
 
+row = div(style='display: flex; gap: 0.5em; padding-bottom: 0.5em;')
+
 def figure_debug(name, number, asy_code):
+    data = json.dumps({'name': name, 'old_code': asy_code})
     return doc(
         f'Figure {number} of {name}',
-        None,
         div[
+            script(id='data', type='application/json')[Markup(data)],
+            row[
+                button(py_click='size_150')['size(150)'],
+                button(py_click='import_olympiad')['import olympiad'],
+            ],
             textarea(cols=80, rows=10)[asy_code],
-            button(py_click='on_click')['Redraw'],
+            row[
+                button(py_click='redraw')['Redraw'],
+                button(py_click='save')['Save']
+            ],
             div(id='svg')[figure.generate_svg_code(asy_code)],
             script(type='py', src='/pyscript/figure_debug.py'),
         ]

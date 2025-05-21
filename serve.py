@@ -13,7 +13,7 @@ problems_dir = Path('problems')
 
 
 async def index(_request):
-    doc = template.doc('Index', None,
+    doc = template.doc('Index',
         ul[
             (li[a(href=f'/{f.stem}/')[f.stem]]
              for f in sorted(problems_dir.glob('*.md')))
@@ -37,10 +37,11 @@ async def document(request):
 
     doc = template.doc(
         name.capitalize().replace('-', ' '),
-        caption,
-        markdown.render(markdown_code),
+        div[
+            caption,
+            markdown.render(markdown_code),
+        ]
     )
-
     return web.Response(text=doc, content_type='html')
 
 async def render_figures(request : web.Request):
@@ -64,7 +65,7 @@ async def render_figures(request : web.Request):
     else:
         return web.Response(text=f'{proc.stdout}\n\nReturn code: {proc.returncode}')
 
-async def figure_debug(request):
+async def debug_figure(request):
     name = request.match_info.get('name')
     number = int(request.match_info.get('number'))
     path = problems_dir / (name + '.md')
@@ -76,8 +77,15 @@ async def figure_debug(request):
     return web.Response(text=template.figure_debug(name, number, asy_code), content_type='html')
 
 async def render_figure(request : web.Request):
-    result = await request.json()
-    return web.Response(text=str(figure.generate_svg_code(result['code'])), content_type='html')
+    params = await request.json()
+    return web.Response(text=str(figure.generate_svg_code(params['code'])), content_type='html')
+
+async def save_figure(request : web.Request):
+    params = await request.json()
+    md_file : Path = problems_dir / (params['name'] + '.md')
+    new_text = md_file.read_text().replace(params['old_code'], params['new_code'])
+    md_file.write_text(new_text)
+    return web.Response(text=f'Successfully saved {md_file}')
 
 
 app = web.Application()
@@ -87,7 +95,8 @@ app.add_routes([
     web.static('/pyscript', 'pyscript', show_index=True),
     web.get('/{name}/', document),
     web.get('/{name}/render-figures', render_figures),
-    web.get('/{name}/figure-debug/{number}/', figure_debug),
+    web.get('/{name}/figure/{number}/', debug_figure),
+    web.post('/save-figure/', save_figure),
     web.post('/render-figure/', render_figure)
 ])
 

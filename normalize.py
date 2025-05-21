@@ -66,7 +66,7 @@ class LineProcessor:
       style = 'color: blue; font-size: 2em; border: 1px dashed blue; padding: 0.5em;'
       body = f'<span style="{style}">FIGURE</span>'
 
-    return f'<a href="./figure-debug/{number}/"> {body} </a>'
+    return f'<a href="./figure/{number}/"> {body} </a>'
 
 
 def get_svg_width(svg_file : Path):
