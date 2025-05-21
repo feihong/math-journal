@@ -1,6 +1,7 @@
 """
 Process a markdown line so that it looks nicer when rendered.
 """
+from pathlib import Path
 import re
 from dataclasses import dataclass
 
@@ -16,6 +17,7 @@ class LineProcessor:
     self.mode = None
     self.text = text
     self.figures = []
+    self.unrendered_count = 0
 
   def process(self):
     return '\n'.join(self._process(self.text))
@@ -57,14 +59,24 @@ class LineProcessor:
     number = len(self.figures)
     self.figures.append(code)
 
-    if svg_file.exists():
+    if svg_file.exists() and get_svg_width(svg_file) > 60:
       body = f'<img src="/figures/{svg_file.name}">'
     else:
+      self.unrendered_count += 1
       style = 'color: blue; font-size: 2em; border: 1px dashed blue; padding: 0.5em;'
       body = f'<div style="{style}">FIGURE</div>'
 
     return f'<a href="./figure-debug/{number}/"> {body} </a>'
 
+
+def get_svg_width(svg_file : Path):
+  with svg_file.open() as fp:
+    # First two lines are metadata
+    fp.readline()
+    fp.readline()
+    svg_line = fp.readline()
+    m = re.match(r".*width='([\d.]+)pt'.*", svg_line)
+    return float(m.group(1))
 
 def transform(text):
   proc = LineProcessor(text)

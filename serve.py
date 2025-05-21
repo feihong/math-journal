@@ -16,7 +16,7 @@ async def index(_request):
     doc = template.doc('Index', None,
         ul[
             (li[a(href=f'/{f.stem}/')[f.stem]]
-             for f in problems_dir.glob('*.md'))
+             for f in sorted(problems_dir.glob('*.md')))
         ]
     )
     return web.Response(text=doc, content_type='html')
@@ -28,12 +28,12 @@ async def document(request):
     proc = normalize.LineProcessor(path.read_text())
     markdown_code = proc.process()
 
-    if len(proc.figures) == 0:
-        caption = None
-    else:
+    if proc.unrendered_count > 0:
         caption = div[
-            a(href=f"/{name}/render-figures")["Render figures"]
+            a(href=f"/{name}/render-figures")[f"Render {proc.unrendered_count} figures"]
         ]
+    else:
+        caption = None
 
     doc = template.doc(
         name.capitalize().replace('-', ' '),
@@ -43,7 +43,7 @@ async def document(request):
 
     return web.Response(text=doc, content_type='html')
 
-async def render_figures(request):
+async def render_figures(request : web.Request):
     name = request.match_info.get('name')
     path = problems_dir / (name + '.md')
 
@@ -59,7 +59,10 @@ async def render_figures(request):
 
     proc = figure.generate_svg_files(asy_files)
 
-    return web.Response(text=proc.stdout)
+    if proc.returncode == 0:
+        return web.HTTPPermanentRedirect(f'/{name}/')
+    else:
+        return web.Response(text=f'{proc.stdout}\n\nReturn code: {proc.returncode}')
 
 async def figure_debug(request):
     name = request.match_info.get('name')
