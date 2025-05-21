@@ -75,6 +75,11 @@ async def figure_debug(request):
     asy_code = proc.figures[number]
     return web.Response(text=template.figure_debug(name, number, asy_code), content_type='html')
 
+async def render_figure(request : web.Request):
+    result = await request.json()
+    return web.Response(text=str(figure.generate_svg_code(result['code'])), content_type='html')
+
+
 app = web.Application()
 app.add_routes([
     web.get('/', index),
@@ -83,6 +88,7 @@ app.add_routes([
     web.get('/{name}/', document),
     web.get('/{name}/render-figures', render_figures),
     web.get('/{name}/figure-debug/{number}/', figure_debug),
+    web.post('/render-figure/', render_figure)
 ])
 
 if __name__ == '__main__':

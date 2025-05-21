@@ -43,12 +43,12 @@ def generate_svg_code(code):
     cmd = [
         'asy',
         '-outformat', 'svg',
-        '-outname', '-',
+        '-outname', 'debug',
         '-',
     ]
     print(cmd)
     proc = subprocess.run(cmd, cwd=figures_dir, input=code, env=os.environ, stdout=subprocess.PIPE,
-                          encoding='utf-8')
+                          stderr=subprocess.STDOUT, encoding='utf-8')
     if proc.returncode == 0:
         svg_file = figures_dir / 'debug.svg'
         with svg_file.open() as fp:

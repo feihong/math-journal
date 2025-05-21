@@ -1,6 +1,9 @@
-import sys
-from pyscript import display, document
+import json
+from pyscript import document, fetch
 
-def on_click(_evt):
-    display(sys.version)
+async def on_click(_evt):
+    code = document.querySelector('textarea').value
+    body = json.dumps({'code': code})
+    svg_code = await fetch('/render-figure/', method='POST', body=body).text()
+    document.querySelector('#svg').innerHTML = svg_code
 
