@@ -64,7 +64,7 @@ class LineProcessor:
     else:
       self.unrendered_count += 1
       style = 'color: blue; font-size: 2em; border: 1px dashed blue; padding: 0.5em;'
-      body = f'<div style="{style}">FIGURE</div>'
+      body = f'<span style="{style}">FIGURE</span>'
 
     return f'<a href="./figure-debug/{number}/"> {body} </a>'
 

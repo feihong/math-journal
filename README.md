@@ -20,17 +20,15 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 
 ## TODO
 
-- Don't show render link if all figures are rendered
 - Edit asymptote code directly from figure-debug page
-- Redirect back to the page if everything successfully rendered
 - Click on problem description to black out all other elements on the page
 - Generate an TOC for all problems on a page
 
 ## Links
 
-- [TinyTeX](https://github.com/rstudio/tinytex)
 - [Asymptote: The Vector Graphics Language](https://asymptote.sourceforge.io/)
 - [Asymptote geometry module](https://web.archive.org/web/20200128180233/http://www.piprime.fr/files/asymptote/geometry/modules/geometry.asy.index.type.html)
 - [Asymptote: Macros and Packages](https://artofproblemsolving.com/wiki/index.php/Asymptote:_Macros_and_Packages)
+- [TinyTeX](https://github.com/rstudio/tinytex)
 - [KaTeX Support Table](https://katex.org/docs/support_table.html)
 - [MathJax Support Table](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
