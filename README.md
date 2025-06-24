@@ -26,6 +26,7 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 
 ## Links
 
+- [OCP CAD Viewer for VS Code](https://github.com/bernhard-42/vscode-ocp-cad-viewer)
 - [Asymptote: The Vector Graphics Language](https://asymptote.sourceforge.io/)
 - [Asymptote geometry module](https://web.archive.org/web/20200128180233/http://www.piprime.fr/files/asymptote/geometry/modules/geometry.asy.index.type.html)
 - [Asymptote: Macros and Packages](https://artofproblemsolving.com/wiki/index.php/Asymptote:_Macros_and_Packages)
