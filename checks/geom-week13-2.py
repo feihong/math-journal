@@ -2,13 +2,13 @@ import math
 from build123d import *
 from ocp_vscode import *
 
-with BuildSketch() as sector:
-    with BuildLine():
-        o = (0, 0)
-        a = CenterArc(o, 12, 0, 150)
-        Line(a @ 0, o)
-        Line(o, a @ 1)
-    make_face()
+o = (0, 0)
+a = CenterArc(o, 12, 0, 150) # semicircle
+l1 = Line(a @ 0, o)
+l2 = Line(o, a @ 1)
 
-show(sector, grid=True, position=[0, 0, 1], quaternion=[0, 0, 0, 1])
-print(f'Circle sector has an area of 60pi: {math.isclose(sector.sketch.area, 60*math.pi)}')
+lines = Curve() + [a, l1, l2]
+sector = make_face(lines)
+show(sector, grid=True, reset_camera=Camera.CENTER)
+
+print(f'Circle sector has area = 60pi: {math.isclose(sector.area, 60*math.pi)}')
