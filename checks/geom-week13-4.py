@@ -9,6 +9,5 @@ lines = Curve() + [
 ]
 region = make_face(lines)
 
-
 show(region, colors=['blue'], grid=True, reset_camera=Camera.CENTER)
 print(f'Blue region has an area of 15pi: {math.isclose(region.area, 15*math.pi)}')
