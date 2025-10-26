@@ -4,7 +4,7 @@ from aiohttp import web
 from htpy import ul, li, a, div
 
 import template
-import markdown
+import markdownutil
 import normalize
 import figure
 
@@ -39,7 +39,7 @@ async def document(request):
         name.capitalize().replace('-', ' '),
         div[
             caption,
-            markdown.render(markdown_code),
+            markdownutil.render(markdown_code),
         ]
     )
     return web.Response(text=doc, content_type='html')
