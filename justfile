@@ -7,6 +7,7 @@ help:
 install:
 	pip install -r requirements.txt
 
+# Merge all pdfs in the homework directory
 merge:
 	python merge_pdfs.py
 
