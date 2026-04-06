@@ -1,0 +1,11 @@
+{
+  "name": "Save Prepwork",
+  "version": "1.0",
+  "description": "tbd",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "downloads", "scripting", "windows"],
+  "action": {},
+  "manifest_version": 3
+}
