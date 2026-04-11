@@ -5,7 +5,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["activeTab", "downloads", "scripting", "windows"],
+  "permissions": ["activeTab", "scripting", "windows"],
   "action": {},
   "manifest_version": 3
 }
