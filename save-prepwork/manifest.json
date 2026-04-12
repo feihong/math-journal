@@ -1,7 +1,7 @@
 {
-  "name": "Save Prepwork",
+  "name": "Lift Content",
   "version": "1.0",
-  "description": "tbd",
+  "description": "Lift specific content to the top of the DOM tree",
   "background": {
     "service_worker": "background.js"
   },

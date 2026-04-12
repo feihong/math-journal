@@ -1,18 +1,53 @@
-const WINDOW_WIDTH = 800
+function getConfig(url) {
+  if (url.includes('/prepwork/')) {
+    return {
+      windowWidth: 800,
+      titleSelector: 'h3.title',
+      contentSelector: '.aops-scrollbar-not-visible',
+    }
+  } else if (url.includes('/forum/')) {
+    return {
+      windowWidth: 700,
+      titleSelector: '.cmty-topic-subject',
+      contentSelector: '.cmty-post-middle',
+      clearBackground: true,
+      margin: '1em 1em 1em 3em',
+    }
+  }
+}
 
 async function start(tab) {
   const current = await chrome.windows.getCurrent()
 
+  const config = getConfig(tab.url)
+
   // Set the width of window to a specific value for consistency in PDFs
   await chrome.windows.update(current.id, {
-    width: WINDOW_WIDTH,
+    width: config.windowWidth,
     state: 'normal',
   })
 
-  // Execute content.js in the context of the page
+  // Get rid of all UI on the page other than the content
   await chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    files: [ 'content.js' ],
+    args: [ config ],
+    func: ({ titleSelector, contentSelector, ...config }) => {
+      const title = document.querySelector(titleSelector).textContent.trim()
+      document.body.innerHTML = document.querySelector(contentSelector).innerHTML
+
+      const h1 = document.createElement('h1')
+      h1.innerHTML = title
+      document.body.prepend(h1)
+
+      if (config.clearBackground) {
+        document.body.style.backgroundColor = 'white'
+        document.body.style.backgroundImage = 'none'
+      }
+
+      if (config.margin) {
+        document.body.style.margin = config.margin
+      }
+    },
   })
 }
 
