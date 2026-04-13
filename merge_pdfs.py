@@ -10,13 +10,15 @@ import functools
 import typing
 import pymupdf
 
-output_file = Path('AoPS Intermediate Algebra Homework.pdf')
-homework_dir = Path('~/Downloads/aops intermediate algebra').expanduser()
+
+input_dir = Path('~/Downloads/aops intro physics').expanduser()
+output_file = input_dir / 'AoPS Intro Physics Homework.pdf'
+
 
 # Specifies relative ordering of files within a week as well as what their titles are in the TOC
 file_order_title = [
-  ('board', 'Message Board Problems'),
-  ('intalg', 'Homework'),
+  ('reading', 'Prep Work'),
+  ('homework', 'Homework'),
   ('solution', 'Homework Solutions')
 ]
 
@@ -43,7 +45,7 @@ class PdfFile(typing.NamedTuple):
 
   @property
   def path(self):
-    return homework_dir / self.filename
+    return input_dir / self.filename
 
   def __eq__(self, other):
     return (self.num, self.name) == (other.num, other.name)
@@ -52,9 +54,15 @@ class PdfFile(typing.NamedTuple):
     return (self.num, order_map[self.name]) < (other.num, order_map[other.name])
 
 
+def get_input_pdf_files():
+  for f in input_dir.glob('*.pdf'):
+    if f.name != output_file.name:
+      yield PdfFile.make(f.name)
+
+
 def main():
   # Get all PDF files in the correct order
-  pdf_files = list(sorted(PdfFile.make(f.name) for f in homework_dir.glob('*.pdf')))
+  pdf_files = sorted(get_input_pdf_files())
   merge(pdf_files)
 
 
