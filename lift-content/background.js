@@ -13,6 +13,10 @@ function getConfig(url) {
       clearBackground: true,
       margin: '1em 1em 1em 3em',
     }
+  } else if (url.includes('/homework/')) {
+    return {
+      windowWidth: 700
+    }
   }
 }
 
@@ -27,28 +31,31 @@ async function start(tab) {
     state: 'normal',
   })
 
-  // Get rid of all UI on the page other than the content
-  await chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    args: [ config ],
-    func: ({ titleSelector, contentSelector, ...config }) => {
-      const title = document.querySelector(titleSelector).textContent.trim()
-      document.body.innerHTML = document.querySelector(contentSelector).innerHTML
+  if (config.titleSelector && config.contentSelector) {
+    // Get rid of all UI on the page other than the content
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      args: [config],
+      func: ({ titleSelector, contentSelector, ...config }) => {
+        const title = document.querySelector(titleSelector).textContent.trim()
+        document.body.innerHTML = document.querySelector(contentSelector).innerHTML
 
-      const h1 = document.createElement('h1')
-      h1.innerHTML = title
-      document.body.prepend(h1)
+        // Create h1 element and prepend to document body
+        const h1 = document.createElement('h1')
+        h1.innerHTML = title
+        document.body.prepend(h1)
 
-      if (config.clearBackground) {
-        document.body.style.backgroundColor = 'white'
-        document.body.style.backgroundImage = 'none'
-      }
+        if (config.clearBackground) {
+          document.body.style.backgroundColor = 'white'
+          document.body.style.backgroundImage = 'none'
+        }
 
-      if (config.margin) {
-        document.body.style.margin = config.margin
-      }
-    },
-  })
+        if (config.margin) {
+          document.body.style.margin = config.margin
+        }
+      },
+    })
+  }
 }
 
 chrome.action.onClicked.addListener(start)
