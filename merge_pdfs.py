@@ -35,8 +35,11 @@ class PdfFile(typing.NamedTuple):
 
   @staticmethod
   def make(filename):
-    name, num = re.match(r'([a-z]+) (\d{2})\.pdf', filename).groups()
-    return PdfFile(filename=filename, name=name, num=int(num))
+    if m := re.match(r'([a-z]+) (\d{2})\.pdf', filename):
+      name, num = m.groups()
+      return PdfFile(filename=filename, name=name, num=int(num))
+    else:
+      raise ValueError
 
   @property
   def title(self):
@@ -55,9 +58,15 @@ class PdfFile(typing.NamedTuple):
 
 
 def get_input_pdf_files():
+  valid_names = {name for name, _title in file_order_title}
+
   for f in input_dir.glob('*.pdf'):
-    if f.name != output_file.name:
-      yield PdfFile.make(f.name)
+    try:
+      pf = PdfFile.make(f.name)
+      if pf.name in valid_names:
+        yield pf
+    except ValueError:
+      pass # filename doesn't have correct format
 
 
 def main():
