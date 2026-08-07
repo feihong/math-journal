@@ -3,6 +3,6 @@ __pycache__
 
 scratch.py
 *.pdf
-*.md
 *.svg
 figures/*.asy
+problems/*.md
