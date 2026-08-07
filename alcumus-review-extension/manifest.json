@@ -1,0 +1,17 @@
+{
+  "name": "Alcumus Review Mode",
+  "version": "1.0",
+  "description": "Makes it easier to review problems you already did in Alcumus",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://artofproblemsolving.com/alcumus/report/me/trial/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "manifest_version": 3
+}
