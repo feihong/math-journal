@@ -17,3 +17,6 @@ clean:
 # Launches a server on localhost:8080
 serve:
 	{{scripts_path}}/aiohttp-devtools runserver serve.py
+
+zip_extension:
+    zip alcumus-review-extension.zip alcumus-review-extension/*

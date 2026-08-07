@@ -6,3 +6,4 @@ scratch.py
 *.svg
 figures/*.asy
 problems/*.md
+*.zip
