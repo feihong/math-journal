@@ -1,4 +1,5 @@
 {
+  "manifest_version": 3,
   "name": "Alcumus Review Mode",
   "version": "1.0",
   "description": "Makes it easier to review problems you already did in Alcumus",
@@ -16,5 +17,12 @@
       "run_at": "document_idle"
     }
   ],
-  "manifest_version": 3
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://artofproblemsolving.com/*"
+      ],
+      "resources": ["injected-script.js"]
+    }
+  ]
 }

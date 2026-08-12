@@ -1,25 +1,41 @@
 const key = 'isActivated'
 
+function injectScript() {
+  const script = document.createElement('script')
+  script.src = chrome.runtime.getURL('injected-script.js')
+  script.onload = () => script.remove()
+  document.body.appendChild(script)
+}
+
 // This justs improves UI, so no need to use mutation observer. Small flicker is acceptable.
 setTimeout(() => {
-  const logPanel = document.querySelector('.alc-log-panel .aops-scroll-outer')
-
-  // Make Log panel taller
-  logPanel.style.height = '500px'
-
   // Hide tall ad banner
   const banner = document.querySelector('.ready-for-next')
   banner.style.display = 'none'
 
+  const logPanel = document.querySelector('.alc-log-panel')
+
+  // Make log panel title clickable
+  const title = logPanel.querySelector('h1')
+  title.style.cursor = 'pointer'
+  title.addEventListener('click', () => {
+    injectScript()
+  })
+
+  const body = logPanel.querySelector('.aops-scroll-outer')
+
+  // Make log panel body taller
+  body.style.height = '400px'
+
+  // Keep body taller
   const observer = new MutationObserver(() => {
     // console.log('Adjust height')
-    logPanel.style.height = '500px'
+    body.style.height = '400px'
   })
-  observer.observe(logPanel, { attributes: true })
+  observer.observe(body, { attributes: true })
 }, 500)
 
 function hideSolution() {
-
   const observer = new MutationObserver((_mutations, obs) => {
     const target = document.querySelector('.alc-solution-box')
     if (target) {
