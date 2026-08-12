@@ -7,7 +7,8 @@ function injectScript() {
   document.body.appendChild(script)
 }
 
-// This justs improves UI, so no need to use mutation observer. Small flicker is acceptable.
+// Hide 'ready for next' ad banner, make log panel much taller.
+// Since small flicker is acceptable, so no need to use mutation observer.
 setTimeout(() => {
   // Hide tall ad banner
   const banner = document.querySelector('.ready-for-next')
@@ -20,6 +21,8 @@ setTimeout(() => {
   title.style.cursor = 'pointer'
   title.addEventListener('click', () => {
     injectScript()
+    title.textContent = 'Log (copied)'
+    setTimeout(() => title.textContent = 'Log', 2000)
   })
 
   const body = logPanel.querySelector('.aops-scroll-outer')
@@ -68,11 +71,10 @@ async function main() {
 
     hideSolution()
 
+    // Hide solution even if navigating to new page
     window.navigation.addEventListener("navigate", (event) => {
-      hideSolution()
-      const url = event.destination.url
       if (isPastProblemUrl(url)) {
-        console.log(url)
+        hideSolution()
       }
     })
   }
