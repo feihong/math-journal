@@ -72,8 +72,8 @@ async function main() {
     hideSolution()
 
     // Hide solution even if navigating to new page
-    window.navigation.addEventListener("navigate", (event) => {
-      if (isPastProblemUrl(url)) {
+    window.navigation.addEventListener('navigate', (event) => {
+      if (isPastProblemUrl(event.destination.url)) {
         hideSolution()
       }
     })
