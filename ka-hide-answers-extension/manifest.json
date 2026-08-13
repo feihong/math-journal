@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Khan Academy Hide Answers",
+  "version": "1.0",
+  "description": "Hide answers for multiple choice questions",
+  "permissions": ["scripting", "activeTab"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.khanacademy.org/*/quiz/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
