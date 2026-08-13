@@ -20,4 +20,5 @@ serve:
 
 zip_extension:
     zip alcumus-review-extension.zip alcumus-review-extension/*
-    mv alcumus-review-extension.zip ~/Downloads
+    zip ka-hide-answers-extension.zip ka-hide-answers-extension/*
+    mv *.zip ~/Downloads

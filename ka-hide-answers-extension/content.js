@@ -1,3 +1,4 @@
+// Add style to always blur multiple choice answers
 const style = document.createElement('style')
 style.textContent = `
 .perseus-widget-container legend + div {
@@ -20,6 +21,7 @@ function observeSuccessive(target, callback) {
   })
 }
 
+// Add button to 'Choose N answer(s)' legend which reveals answers when clicked
 const enhanceLegend = (container) => {
   const legend = container.querySelector('.perseus-widget-container legend')
   if (legend === null) return
@@ -30,12 +32,12 @@ const enhanceLegend = (container) => {
   legend.addEventListener('click', () => {
     legend.nextElementSibling.style.filter = 'none'
   })
-
 }
 
 setTimeout(() => {
   const contentPanel = document.getElementById('content-library-content-panel')
 
   enhanceLegend(contentPanel)
+  // Enhance legend every time a new question is loaded
   observeSuccessive(contentPanel, enhanceLegend)
 }, 1000)
