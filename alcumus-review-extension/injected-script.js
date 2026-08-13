@@ -15,6 +15,9 @@ async function main() {
     const dateMap = {}
 
     for (const log of logs) {
+      // If trial_id is undefined, then it's an achievement
+      if (log.data.trial_id === undefined) continue
+
       const [date, time] = log.happened_at.split(' ')
       const item = {
         trialId: log.data.trial_id,
@@ -22,7 +25,6 @@ async function main() {
         text: htmlToText(log.data.problem_text_short),
       }
 
-      // TODO: ignore logs with undefined trialId
       if (date in dateMap) {
         dateMap[date].unshift(item)
       } else {

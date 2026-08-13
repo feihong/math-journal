@@ -20,3 +20,4 @@ serve:
 
 zip_extension:
     zip alcumus-review-extension.zip alcumus-review-extension/*
+    mv alcumus-review-extension.zip ~/Downloads
