@@ -33,3 +33,7 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 - [TinyTeX](https://github.com/rstudio/tinytex)
 - [KaTeX Support Table](https://katex.org/docs/support_table.html)
 - [MathJax Support Table](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
+
+## Notes
+
+A lot of AoPS content is best captured using [Just-One-Page-PDF](https://chromewebstore.google.com/detail/just-one-page-pdf-an-awes/fgbhbfdgdlojklkbhdoilkdlomoilbpl?hl=en&pli=1) extension. It perfectly captures the formatting of the pages and doesn't introduce any annoying page breaks in the content.
