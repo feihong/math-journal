@@ -34,11 +34,20 @@ const enhanceLegend = (container) => {
   })
 }
 
-setTimeout(() => {
+const enhanceContentPanel = () => {
   const contentPanel = document.getElementById('content-library-content-panel')
+
+  // Try again if contentPanel hasn't yet been loaded
+  if (contentPanel === null) {
+    setTimeout(enhanceContentPanel, 1000)
+    return
+  }
+
   console.log('Content panel:', contentPanel)
 
   enhanceLegend(contentPanel)
   // Enhance legend every time a new question is loaded
   observeSuccessive(contentPanel, enhanceLegend)
-}, 1000)
+}
+
+setTimeout(enhanceContentPanel, 1000)
