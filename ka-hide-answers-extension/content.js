@@ -36,6 +36,7 @@ const enhanceLegend = (container) => {
 
 setTimeout(() => {
   const contentPanel = document.getElementById('content-library-content-panel')
+  console.log('Content panel:', contentPanel)
 
   enhanceLegend(contentPanel)
   // Enhance legend every time a new question is loaded
