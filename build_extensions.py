@@ -6,6 +6,7 @@
 Bundle all browser extensions into zip files and also generate an index page for them.
 
 """
+
 import json
 import subprocess
 from collections import namedtuple
@@ -31,8 +32,10 @@ def main():
 
     for ext_dir in Path(HERE).glob("*-extension"):
         zip_file = build_dir / f"{ext_dir.name}.zip"
-        cmd = ["zip", "-r", zip_file, ext_dir]
-        subprocess.run(cmd, check=False)
+        if zip_file.exists():
+            zip_file.unlink()
+        cmd = ["zip", "-r", zip_file, "."]
+        subprocess.run(cmd, cwd=ext_dir, check=False)
 
         manifest_file = ext_dir / "manifest.json"
         manifest = json.loads(manifest_file.read_text())
@@ -57,14 +60,16 @@ def layout(content):
                 content="width=device-width, initial-scale=1.0, viewport-fit=cover",
             ),
             title[title_text],
-            style["""
-            .row {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 1em;
-            }
-            """],
+            style[
+                """
+                .row {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 1em;
+                }
+                """
+            ],
         ],
         body[
             h1[title_text],
@@ -75,7 +80,10 @@ def layout(content):
 
 def generate_index_page(extensions):
     doc = layout(
-        div[div(class_='row')[h2[e.name], anchor(href=e.file.name)["Download"]], div[e.description]]
+        div[
+            div(class_="row")[h2[e.name], anchor(href=e.file.name)["Download"]],
+            div[e.description],
+        ]
         for e in extensions
     )
 
