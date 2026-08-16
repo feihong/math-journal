@@ -3,10 +3,11 @@
   "name": "Alcumus Review Mode",
   "version": "1.0",
   "description": "Makes it easier to review problems you already did in Alcumus",
-  "permissions": ["scripting", "activeTab", "storage"],
-  "action": {
-    "default_popup": "popup.html"
-  },
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": [
+    "https://artofproblemsolving.com/alcumus/problem",
+    "https://artofproblemsolving.com/alcumus/report/me/trial/*"
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -14,15 +15,8 @@
         "https://artofproblemsolving.com/alcumus/report/me/trial/*"
       ],
       "js": ["content.js"],
+      "world": "MAIN",
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "matches": [
-        "https://artofproblemsolving.com/*"
-      ],
-      "resources": ["injected-script.js"]
     }
   ]
 }

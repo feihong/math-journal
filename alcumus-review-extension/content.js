@@ -1,12 +1,3 @@
-const key = 'isActivated'
-
-function injectScript() {
-  const script = document.createElement('script')
-  script.src = chrome.runtime.getURL('injected-script.js')
-  script.onload = () => script.remove()
-  document.body.appendChild(script)
-}
-
 // Hide 'ready for next' ad banner, make log panel much taller.
 // Since small flicker is acceptable, so no need to use mutation observer.
 setTimeout(() => {
@@ -20,7 +11,7 @@ setTimeout(() => {
   const title = logPanel.querySelector('h1')
   title.style.cursor = 'pointer'
   title.addEventListener('click', () => {
-    injectScript()
+    copyLogsDataToClipboard()
     title.textContent = 'Log (copied)'
     setTimeout(() => title.textContent = 'Log', 2000)
   })
@@ -62,13 +53,52 @@ function isPastProblemUrl(url) {
   return url.match(/\/alcumus\/report\/me\/trial\/.*/) !== null
 }
 
+const htmlToText = (htmlString) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  return doc.body.textContent || "";
+}
+
+const getLogsMarkdown = (logs) => {
+  const dateMap = {}
+
+  for (const log of logs) {
+    // If trial_id is undefined, then it's an achievement
+    if (log.data.trial_id === undefined) continue
+
+    const [date, time] = log.happened_at.split(' ')
+    const item = {
+      trialId: log.data.trial_id,
+      time: time.substring(0, 5),
+      text: htmlToText(log.data.problem_text_short),
+    }
+
+    if (date in dateMap) {
+      dateMap[date].unshift(item)
+    } else {
+      dateMap[date] = [item]
+    }
+  }
+
+  const lines = []
+  for (const [date, items] of Object.entries(dateMap)) {
+    lines.push(`# ${date}`)
+    for (const { trialId, time, text } of items) {
+      lines.push(`- [${time}](https://artofproblemsolving.com/alcumus/report/me/trial/${trialId}) - ${text}`)
+    }
+  }
+  return lines.join('\n')
+}
+
+async function copyLogsDataToClipboard() {
+  const logs = AoPS.bootstrap_data.alc_init_data.user.logs
+  const markdown = getLogsMarkdown(logs)
+  await navigator.clipboard.writeText(markdown)
+  console.log('Copied to clipboard:\n\n' + markdown)
+}
+
 async function main() {
   if (isPastProblemUrl(location.pathname)) {
-    console.log(location.href)
-
-    const result = await chrome.storage.local.get([key])
-    if (!result.isActivated) return
-
     hideSolution()
 
     // Hide solution even if navigating to new page
