@@ -21,16 +21,19 @@ function observeSuccessive(target, callback) {
   })
 }
 
-// Add button to 'Choose N answer(s)' legend which reveals answers when clicked
-const enhanceLegend = (container) => {
-  const legend = container.querySelector('.perseus-widget-container legend')
-  if (legend === null) return
+// Add button to each 'Choose N answer(s)' legend which reveals answers when clicked
+const enhanceLegends = (container) => {
+  const legends = container.querySelectorAll('.perseus-widget-container legend')
+  if (legends.length === 0) return
 
-  legend.style.padding = '0.2em'
-  legend.style.border = '1px dashed #aaa'
-  legend.style.cursor = 'pointer'
-  legend.addEventListener('click', () => {
-    legend.nextElementSibling.style.filter = 'none'
+  legends.forEach(legend => {
+    legend.style.padding = '0.2em'
+    legend.style.border = '1px dashed #aaa'
+    legend.style.cursor = 'pointer'
+    legend.addEventListener('click', () => {
+      // Assume the next sibling is the multiple choice container
+      legend.nextElementSibling.style.filter = 'none'
+    })
   })
 }
 
@@ -45,9 +48,9 @@ const enhanceContentPanel = () => {
 
   console.log('Content panel:', contentPanel)
 
-  enhanceLegend(contentPanel)
+  enhanceLegends(contentPanel)
   // Enhance legend every time a new question is loaded
-  observeSuccessive(contentPanel, enhanceLegend)
+  observeSuccessive(contentPanel, enhanceLegends)
 }
 
 setTimeout(enhanceContentPanel, 1000)
