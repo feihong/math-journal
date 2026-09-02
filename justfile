@@ -20,6 +20,9 @@ clean:
 serve:
 	{{scripts_path}}/aiohttp-devtools runserver serve.py
 
+interleave:
+    uv run interleave_pdf.py
+
 build_extensions:
     uv run --env-file .env build_extensions.py
 
