@@ -6,8 +6,8 @@
 Create a new PDF by interleaving sections from two PDFs together
 """
 
-import itertools
 import re
+from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,16 +18,25 @@ second_file = Path("~/Downloads/number-theory/solutions.pdf").expanduser()
 output_file = Path(__file__).parent / "output.pdf"
 
 
+InsertRange = namedtuple("InsertRange", ["start", "end"])
+
+
 @dataclass
 class TocItem:
     file: pymupdf.Document
     page: int
     title: str
     level: int
-    next: "TocItem" = None
+    insert_range: InsertRange = None
+    doc_page: int = None
 
     def __str__(self):
-        return f'page: {self.page}, title: {self.title}, next: {self.next.title if self.next else None}'
+        ir = (
+            f"({self.insert_range.start}, {self.insert_range.end})"
+            if self.insert_range
+            else "None"
+        )
+        return f"page: {self.page}, title: {self.title}, insert_range: {ir}, toc_page: {self.toc_page} "
 
 
 TABLE_OF_CONTENTS = """
@@ -229,48 +238,25 @@ TABLE_OF_CONTENTS = """
 
 def main():
     files = [pymupdf.open(first_file), pymupdf.open(second_file)]
-    toc_items = list(get_toc_items(files))
-    fill_in_next(toc_items, files)
+    toc_items = get_toc_items(files)
 
-    bookmarks = {file: 0 for file in files}
     doc = pymupdf.open()
 
     # Build pdf
     for item in toc_items:
-        print(item)
-        bookmark = bookmarks[item.file]
+        # print(item)
+        match item.insert_range:
+            case InsertRange(start=start, end=end):
+                doc.insert_file(item.file, from_page=start - 1, to_page=end - 1)
 
-        start = max(item.page, bookmark)
-
-        match item.next:
-            case None:
-                end = item.file.page_count - 1
-            case TocItem(page=p):
-                end = max(bookmark, p - 1)
-
-        if end >= bookmark:
-            doc.insert_file(item.file, from_page=start, to_page=end)
-            pages_added = end - bookmark + 1
-        else:
-            pages_added = 0
-
-        bookmarks[item.file] += pages_added
-
-    # Build toc
-    toc = []
-    curr_page = 1
-    for item in toc_items:
-    	add_to_toc(toc, item, curr_page)
-    	if item.next:
-    		curr_page += item.next.page - item.page
-    	else:
-    		curr_page += item.file.page_count - item.page + 1
-
+    toc = [[item.level, item.title, item.toc_page] for item in toc_items]
     doc.set_toc(toc)
     doc.save(output_file)
 
 
-def get_toc_items(files):
+def _get_toc_items(files):
+    prevs = {file: None for file in files}
+
     for line in TABLE_OF_CONTENTS.strip().splitlines():
         line = line.strip()
         if not line:
@@ -279,19 +265,40 @@ def get_toc_items(files):
         file_index, page_start, title = line.split(" ", maxsplit=2)
         file_index = int(file_index) - 1
         file = files[file_index]
-        page = int(page_start) - 1
+        page = int(page_start)
         level = get_toc_level(title)
-        yield TocItem(file, page, title, level)
+        item = TocItem(file, page, title, level)
+
+        if (prev := prevs[file]) is not None:
+            if prev.page == item.page:
+                if prev.insert_range is not None:
+                    prev.insert_range = InsertRange(prev.page, prev.page)
+
+                item.insert_range = None
+            else:
+                prev.insert_range = InsertRange(prev.page, item.page - 1)
+
+        prevs[file] = item
+        yield item
+
+    # Set the item_range for the very last items
+    for item in prevs.values():
+        item.insert_range = InsertRange(item.page, item.file.page_count)
 
 
-def fill_in_next(toc_items, files):
-    for file in files:
-        items = (item for item in toc_items if item.file == file)
+def get_toc_items(files):
+    items = list(_get_toc_items(files))
 
-        for item1, item2 in itertools.pairwise(items):
-            item1.next = item2
+    # Computer TOC pages because insert_ranges are not available until first loop finishes
+    curr_page = 1
+    for item in items:
+        item.toc_page = curr_page
+        print("  " * (item.level - 1), item.title, item.toc_page)
 
-        item2.next = None
+        if (ir := item.insert_range) is not None:
+            curr_page += ir.end - ir.start + 1
+
+    return items
 
 
 def get_toc_level(title):
@@ -299,11 +306,6 @@ def get_toc_level(title):
         return 2
     else:
         return 1
-
-
-def add_to_toc(toc, item, page):
-    print('  ' * (item.level - 1), item.title, page)
-    toc.append([item.level, item.title, page])
 
 
 if __name__ == "__main__":
