@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Alcumus Review Mode",
-  "version": "1.0",
-  "description": "Makes it easier to review problems you already did in Alcumus",
+  "name": "AoPS Review",
+  "version": "1.1",
+  "description": "Makes it easier to review AoPS Alcumus (and other) problems",
   "permissions": ["scripting", "activeTab"],
   "host_permissions": [
     "https://artofproblemsolving.com/alcumus/problem",
