@@ -2,7 +2,7 @@
 Extract problem text
 */
 {
-  const getTitle = function(header) {
+  const getTitle = (header) => {
     const textChunks = [...header.childNodes].map(node => node.wholeText?.trim())
 
     for (const text of textChunks) {
@@ -13,34 +13,51 @@ Extract problem text
     return undefined
   }
 
-  const getTextChunks = function*(node) {
-	  if (node instanceof Text) {
-	    yield node.wholeText
-	  } else if (node instanceof HTMLImageElement) {
-	    yield node.getAttribute('alt')
-	  } else {
-	    for (const child of node.childNodes) {
-	      yield* getTextChunks(child)
-	    }
-	  }
-	}
+  const getTextChunks = function* (node) {
+    if (node instanceof Text) {
+      yield node.wholeText
+    } else if (node instanceof HTMLImageElement) {
+      yield node.getAttribute('alt')
+    } else {
+      for (const child of node.childNodes) {
+        yield* getTextChunks(child)
+      }
+    }
+  }
+
+  const indent = (s) => {
+    const lines = s.split('\n').map(l => {
+      if (l[0] == " " && l[1] == " ")
+        return l
+      else if (l[0] == " ")
+        return " " + l
+      else
+        return "  " + l
+    })
+    return lines.join('\n')
+  }
 
   const problems =
-    [...document.querySelectorAll('.problem-cronus-wrapper-outer')]
-    .map(node => {
-      const title = getTitle(node.querySelector('.problem-header'))
-      const body =
-        [...getTextChunks(node.querySelector('.body'))].join('').trim()
+    [...document.querySelectorAll('.grid-tab-assignments-problem')]
+      .map(node => {
+        const title = getTitle(node.querySelector('.problem-header'))
+        const anchorName = node.querySelector('a[name]').name
+        const url = `https://${location.host}${location.pathname}#${anchorName}`
+        const body =
+          indent(Array.from(getTextChunks(node.querySelector('.body'))).join('').trim())
 
-      return {
-        title: title,
-        body: body,
-      }
-    })
+        return {
+          title,
+          url,
+          body,
+        }
+      })
   // console.log(problems)
 
   const problemText =
-    problems.map(({title, body}) => `${title}\n${body}`).join('\n\n')
+    problems
+      .map(({ title, body, url }) => `- [ ] [${title}](${url})\n${body}`)
+      .join('\n\n')
 
   console.log(problemText)
 }
