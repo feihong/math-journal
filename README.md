@@ -18,12 +18,6 @@ Stitch homework PDF files inside `homework/` directory into a single PDF file:
 1. Choose paper size of A5 (makes text bigger)
 1. Toggle background graphics
 
-## TODO
-
-- Add Save button to figure-debug page
-- Click on problem description to black out all other elements on the page
-- Generate an TOC for all problems on a page
-
 ## Links
 
 - [OCP CAD Viewer for VS Code](https://github.com/bernhard-42/vscode-ocp-cad-viewer)

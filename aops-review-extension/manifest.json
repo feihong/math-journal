@@ -6,12 +6,14 @@
   "permissions": ["scripting", "activeTab"],
   "host_permissions": [
     "https://artofproblemsolving.com/alcumus/problem",
+    "https://artofproblemsolving.com/alcumus/report/me",
     "https://artofproblemsolving.com/alcumus/report/me/trial/*"
   ],
   "content_scripts": [
     {
       "matches": [
         "https://artofproblemsolving.com/alcumus/problem",
+        "https://artofproblemsolving.com/alcumus/report/me",
         "https://artofproblemsolving.com/alcumus/report/me/trial/*"
       ],
       "js": ["content.js"],

@@ -3,70 +3,42 @@ const makeButton = (label, parent, callback) => {
   btn.style.fontSize = '0.7em'
   btn.textContent = label
   btn.addEventListener('click', callback)
-  parent.appendChild(btn)
+  if (parent) {
+    parent.appendChild(btn)
+  }
   return btn
 }
 
-// Hide 'ready for next' ad banner, make log panel much taller.
-const makeLogPanelMoreVisible = () => {
-  console.log('Make log panel more visible')
+const sleep = (ms) => new Promise((resolve, _reject) => setTimeout(resolve, ms))
 
-  // Keep trying until you succeed
-  const banner = document.querySelector('.ready-for-next')
-  if (banner === null) {
-    setTimeout(makeLogPanelMoreVisible, 200)
-    return
+const pollElement = async (cssSelector, options, callback) => {
+  if (options.delay) {
+    await sleep(options.delay)
   }
 
-  // Hide tall ad banner
-  banner.style.display = 'none'
-
-  const logPanel = document.querySelector('.alc-log-panel')
-
-  // Add buttons to log panel header
-  const header = logPanel.querySelector('h1')
-  header.style.display = 'flex'
-  header.style.flexDirection = 'row'
-  header.style.gap = '0.5em'
-
-  makeButton('all', header, () => copyToClipboard(getAllLogsMarkdown()))
-  makeButton('last', header, () => copyToClipboard(getLastLogMarkdown()))
-
-  makeLogPanelTaller()
+  const interval = options.interval || 200
+  let counter = options.timeout || 10_000
+  while (true) {
+    const node = document.querySelector(cssSelector)
+    if (node !== null) {
+      callback(node)
+      return
+    }
+    await sleep(interval)
+    counter -= interval
+    if (counter <= 0) return
+  }
 }
 
-const makeLogPanelTaller = () => {
-  console.log('Make log panel taller')
-
-  const height = '400px'
-
-  const logPanelBody = document.querySelector('.alc-log-panel .aops-scroll-outer')
-  logPanelBody.style.height = height
-
-  // There is some logic that keeps trying to make it shorter, so keep making it taller
-  // Note that invoking this function inside update doesn't seem to help at all
-  const observer = new MutationObserver(() => logPanelBody.style.height = height)
-  observer.observe(logPanelBody, { attributes: true })
-}
-
-function hideAlcumusSolution() {
-  const observer = new MutationObserver((_mutations, obs) => {
-    const target = document.querySelector('.alc-solution-box')
-    if (target) {
-      if (target.style.visibility === 'hidden') return
-
-      target.style.visibility = 'hidden'
-
-      // Add button to show the solution
-      const btn = document.createElement('button')
-      btn.innerHTML = 'Show solution'
-      btn.addEventListener('click', () => target.style.visibility = 'visible')
+const showShowSolutionButton = () => {
+  pollElement('.alc-solution-box', { delay: 500 }, target => {
+    // Don't add button if it's already been added
+    if (target.previousElementSibling && target.previousElementSibling.tagName !== 'BUTTON') {
+      console.log('show "show solution" button')
+      const btn = makeButton('Show solution', null, () => target.style.filter = 'none')
       target.before(btn)
-
-      obs.disconnect()
     }
   })
-  observer.observe(document.body, { childList: true, subtree: true })
 }
 
 function isPastProblemUrl(url) {
@@ -80,51 +52,46 @@ const htmlToText = (htmlString) => {
   return doc.body.textContent || "";
 }
 
-const getLogs = () => {
-  return AoPS.bootstrap_data.alc_init_data.user.logs
-    .filter(log => log.data.trial_id !== undefined)
-    .map(log => {
-      const [date, time] = log.happened_at.split(' ')
+const getTrialsGroupedByDate = () => {
+  const infos = trials.values()
+    .map(trial => {
+      const [date, time] = trial.trial_date.split(' ')
       return {
-        trialId: log.data.trial_id,
+        trialId: trial.trial_id,
         date,
         time: time.substring(0, 5),
-        text: htmlToText(log.data.problem_text_short),
+        topicIds: trial.topic_id_list,
+        text: htmlToText(trial.problem_text_short),
       }
     })
+
+  const groups = Object.groupBy(infos, ({ date }) => date)
+  const entries = Object.entries(groups)
+  // Most recent first
+  entries.sort((a, b) => b[0].localeCompare(a[0]))
+  return entries.map(entry => {
+    const trials = entry[1]
+    trials.sort((a, b) => b.time.localeCompare(a.time))
+    return entry
+  })
 }
 
-const getAllLogsMarkdown = () => {
-  const logs = getLogs()
-
-  const dateMap = {}
-
-  for (const log of logs) {
-    const date = log.date
-    if (date in dateMap) {
-      dateMap[date].unshift(log)
-    } else {
-      dateMap[date] = [log]
-    }
-  }
+const getTrialsMarkdown = (days) => {
+  const entries = getTrialsGroupedByDate().slice(0, days)
 
   const lines = []
-  for (const [date, logs] of Object.entries(dateMap)) {
+  for (const [date, trials] of entries) {
     lines.push(`# ${date}`)
-    for (const log of logs) {
-      lines.push('- [ ] ' + logToMarkdown(log))
+    for (const trial of trials) {
+      lines.push('- [ ] ' + trialToMarkdown(trial))
     }
   }
   return lines.join('\n')
 }
 
-const logToMarkdown = ({ time, trialId, text }) => {
-  return `[${time}](https://artofproblemsolving.com/alcumus/report/me/trial/${trialId}) - ${text}`
-}
-
-const getLastLogMarkdown = () => {
-  const logs = getLogs()
-  return logToMarkdown(logs[0])
+const trialToMarkdown = ({ time, trialId, text, topicIds }) => {
+  const topicsStr = topicIds.map(id => topics.get(id)).join('/')
+  return `[${time} ${topicsStr}](https://artofproblemsolving.com/alcumus/report/me/trial/${trialId}) - ${text}`
 }
 
 async function copyToClipboard(text) {
@@ -132,20 +99,84 @@ async function copyToClipboard(text) {
   console.log('Copied to clipboard:\n\n' + text)
 }
 
-const update = (url) => {
-  if (isPastProblemUrl(url)) {
-    hideAlcumusSolution()
-  }
-}
+const addLogExportUi = () => {
+  if (location.pathname !== '/alcumus/report/me') return
 
-async function main(url) {
-  makeLogPanelMoreVisible()
+  pollElement('.alc-report-problem-table h1', {}, target => {
+    if (target.nextElementSibling && target.nextElementSibling.className === 'custom-log-export')
+      return
 
-  update(location.pathname)
-
-  window.navigation.addEventListener('navigate', (event) => {
-    update(event.destination.url)
+    const template = document.createElement('template')
+    template.innerHTML = `
+      <div class="custom-log-export" style="display: flex; flex-direction: row; gap: 0.5em;">
+        <button>copy</button>
+        <input size="2" value="1">
+        <span>days</span>
+      </div>
+    `
+    const div = template.content.firstElementChild
+    target.after(div)
+    const copyBtn = div.querySelector('button')
+    copyBtn.addEventListener('click', () => {
+      const days = parseInt(div.querySelector('input').value)
+      copyToClipboard(getTrialsMarkdown(days))
+    })
   })
 }
 
-main()
+const topics = new Map()
+const trials = new Map()
+
+async function init() {
+  // Redefine XMLHttpRequest.open to intercept response
+  const originalOpen = XMLHttpRequest.prototype.open
+
+  XMLHttpRequest.prototype.open = function (_method, url, ..._args) {
+    // Listen for the request completion
+    this.addEventListener('readystatechange', (event) => {
+      const xhr = event.target
+
+      if (xhr.readyState === 4) { // 4 means DONE
+        if (url === '/m/alcumus/ajax.php' && xhr.getResponseHeader('content-type') === 'application/json') {
+          const data = JSON.parse(xhr.responseText)
+          if (data.response.trials) {
+            for (const trial of data.response.trials) {
+              // console.log(trial)
+              trials.set(trial.trial_id, trial)
+            }
+          }
+        }
+      }
+    })
+    return originalOpen.apply(this, arguments)
+  }
+
+  for (const topic of AoPS.bootstrap_data.alc_init_data.user.topics) {
+    topics.set(topic.topic_id, topic.name)
+  }
+  console.log(`Found ${topics.size} topics`)
+
+  // Add style to blur solutions
+  const style = document.createElement('style')
+  style.textContent = `
+      .alc-solution-box {
+        filter: blur(10px);
+      }
+
+      /* Don't blur solutions on problem pages */
+      .alc-problem-page-main .alc-solution-box {
+        filter: none;
+      }
+    `
+  document.head.appendChild(style)
+
+  showShowSolutionButton()
+  addLogExportUi()
+
+  window.navigation.addEventListener('navigate', () => {
+    console.log('onnavigate')
+    showShowSolutionButton()
+  })
+}
+
+init()
