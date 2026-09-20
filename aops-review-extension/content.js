@@ -99,10 +99,10 @@ async function copyToClipboard(text) {
   console.log('Copied to clipboard:\n\n' + text)
 }
 
-const addLogExportUi = () => {
-  if (location.pathname !== '/alcumus/report/me') return
+const addTrialExportUi = (pathname) => {
+  if (pathname !== '/alcumus/report/me') return
 
-  pollElement('.alc-report-problem-table h1', {}, target => {
+  pollElement('.alc-report-problem-table h1', { delay: 500 }, target => {
     if (target.nextElementSibling && target.nextElementSibling.className === 'custom-log-export')
       return
 
@@ -171,11 +171,13 @@ async function init() {
   document.head.appendChild(style)
 
   showShowSolutionButton()
-  addLogExportUi()
+  addTrialExportUi(location.pathname)
 
-  window.navigation.addEventListener('navigate', () => {
-    console.log('onnavigate')
+  window.navigation.addEventListener('navigate', (event) => {
+    const pathname = new URL(event.destination.url).pathname
+    console.log(`navigating to ${pathname}`)
     showShowSolutionButton()
+    addTrialExportUi(pathname)
   })
 }
 
