@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Khan Academy Blur Choices",
+  "version": "1.1",
+  "description": "Blur choices for multiple choice questions",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": [
+    "https://www.khanacademy.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.khanacademy.org/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
