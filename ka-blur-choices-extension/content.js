@@ -1,56 +1,74 @@
-// Add style to always blur multiple choice answers
-const style = document.createElement('style')
-style.textContent = `
-.perseus-widget-container legend + div {
-  filter: blur(10px);
-}
-`
-document.head.appendChild(style)
+const sleep = (ms) => new Promise((resolve, _reject) => setTimeout(resolve, ms))
 
-// Invoke callback on first mutation, then re-attach mutation observer after small delay
-function observeSuccessive(target, callback) {
-  const observer = new MutationObserver((list, obs) => {
-    callback(target)
-    obs.disconnect()
+const pollElement = async (cssSelector, options, callback) => {
+  if (options.delay) {
+    await sleep(options.delay)
+  }
 
-    setTimeout(() => observeSuccessive(target, callback), 1000)
-  })
-  observer.observe(target, {
-    childList: true,
-    subtree: true,
-  })
+  const interval = options.interval || 1000
+  let counter = options.timeout || 30_000
+  while (true) {
+    const nodes = document.querySelectorAll(cssSelector)
+    if (nodes.length !== 0) {
+      callback(nodes)
+      return
+    }
+    await sleep(interval)
+    counter -= interval
+    if (counter <= 0) return
+  }
 }
 
-// Add button to each 'Choose N answer(s)' legend which reveals answers when clicked
-const enhanceLegends = (container) => {
-  const legends = container.querySelectorAll('.perseus-widget-container legend')
-  if (legends.length === 0) return
+const update = (url, delay) => {
+  delay = delay ?? 1000
+  if (url.match(/\/(?:e|quiz|test)\//) === null) return
 
-  legends.forEach(legend => {
-    legend.style.padding = '0.2em'
-    legend.style.border = '1px dashed #aaa'
-    legend.style.cursor = 'pointer'
-    legend.addEventListener('click', () => {
-      // Assume the next sibling is the multiple choice container
-      legend.nextElementSibling.style.filter = 'none'
+  pollElement('.perseus-widget-container legend', { delay }, legends => {
+    legends.forEach(legend => {
+      legend.style.padding = '0.2em'
+      legend.style.border = '1px dashed #aaa'
+      legend.style.cursor = 'pointer'
+      legend.addEventListener('click', () => {
+        // Assume the next sibling is the multiple choice container
+        legend.nextElementSibling.style.filter = 'none'
+      })
     })
   })
 }
 
-const enhanceContentPanel = () => {
-  const contentPanel = document.getElementById('content-library-content-panel')
+const init = () => {
+  // Add style to always blur multiple choice answers
+  const style = document.createElement('style')
+  style.textContent = `
+  .perseus-widget-container legend + div {
+    filter: blur(10px);
+  }
+  `
+  document.head.appendChild(style)
 
-  // Try again if contentPanel hasn't yet been loaded
-  if (contentPanel === null) {
-    setTimeout(enhanceContentPanel, 1000)
-    return
+  update(location.pathname)
+
+  window.navigation.addEventListener('navigate', (event) => {
+    update(event.destination.url)
+  })
+
+  // Proxy fetch function so we can update page whenever user presses 'Next question' button
+  const fetchHandler = {
+    apply: async function (target, thisArg, argumentsList) {
+      const resource = argumentsList[0]
+      if (typeof resource === 'object') {
+        const url = new URL(resource.url)
+        if (url.pathname === '/api/internal/_analytics/publish_event' && url.searchParams.get('type') === 'ContentLibraryNextQuestionButtonClicked') {
+          update(location.pathname)
+        }
+      }
+      return Reflect.apply(target, thisArg, argumentsList)
+    }
   }
 
-  console.log('Content panel:', contentPanel)
-
-  enhanceLegends(contentPanel)
-  // Enhance legend every time a new question is loaded
-  observeSuccessive(contentPanel, enhanceLegends)
+  const originalFetch = window.fetch
+  window.fetch = new Proxy(originalFetch, fetchHandler)
+  console.log('KA Blur Choices loaded')
 }
 
-setTimeout(enhanceContentPanel, 1000)
+init()
