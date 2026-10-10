@@ -67,11 +67,10 @@ const getTrialsGroupedByDate = () => {
 
   const groups = Object.groupBy(infos, ({ date }) => date)
   const entries = Object.entries(groups)
-  // Most recent first
-  entries.sort((a, b) => b[0].localeCompare(a[0]))
+  entries.sort((a, b) => a[0].localeCompare(b[0]))
   return entries.map(entry => {
     const trials = entry[1]
-    trials.sort((a, b) => b.time.localeCompare(a.time))
+    trials.sort((a, b) => a.time.localeCompare(b.time))
     return entry
   })
 }
